@@ -1,0 +1,5 @@
+<h2 class="font-semibold text-lg mb-2">🔳 Gerador de QR Code</h2>
+<input type="text" placeholder="Texto ou URL" 
+  oninput="this.nextElementSibling.innerHTML = '<img src=\\'https://api.qrserver.com/v1/create-qr-code/?data=' + encodeURIComponent(this.value) + '&size=150x150\\' />'"
+  class="w-full p-2 rounded border dark:bg-gray-700">
+<div class="mt-2 text-center"></div>
