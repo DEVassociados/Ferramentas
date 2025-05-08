@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ferramentas para Designers e Programadores</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@latest/index.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            secondary: '#10b981',
+            dark: '#1e1e2f',
+            light: '#f4f4f5',
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    section {
+      resize: both;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body class="bg-light text-gray-900 dark:bg-dark dark:text-gray-100 font-inter transition-all">
+  <header class="bg-primary text-white py-6 text-center text-2xl font-semibold">
+    Ferramentas Web para Designers e Programadores
+  </header>
+  <div class="fixed top-4 right-4 z-50">
+    <button onclick="document.documentElement.classList.toggle('dark')" class="bg-secondary text-white px-4 py-2 rounded-xl">🌙 Alternar Tema</button>
+  </div>
+
+  <!-- Menu lateral de ferramentas disponíveis -->
+  <aside class="fixed left-0 top-0 h-full w-60 bg-gray-200 dark:bg-gray-900 shadow-md p-4 overflow-y-auto z-40">
+    <h2 class="text-lg font-semibold mb-4">📦 Ferramentas</h2>
+    <ul id="listaFerramentas" class="space-y-2 text-sm">
+      <!-- Ferramentas serão carregadas dinamicamente -->
+    </ul>
+    <p class="mt-4 text-xs text-gray-600 dark:text-gray-400">
+      URL da pasta com ferramentas externas (GitHub raw):
+    </p>
+    <input id="repoURL" type="text" value="https://raw.githubusercontent.com/DEVassociados/Ferramentas/main/Ferramentas/" class="w-full mt-2 p-1 text-xs rounded border dark:bg-gray-800" />
+    <button onclick="listarFerramentasRepo()" class="mt-2 w-full bg-primary text-white py-1 text-sm rounded">🔍 Buscar Ferramentas</button>
+  </aside>
+
+  <main class="ml-64 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <!-- Ferramentas principais e importadas aparecerão aqui -->
+  </main>
+
+  <script>
+    async function listarFerramentasRepo() {
+      const base = document.getElementById('repoURL').value;
+      const apiURL = base.replace('raw.githubusercontent.com', 'api.github.com/repos').replace('/main/', '/contents/');
+
+      try {
+        const res = await fetch(apiURL);
+        const data = await res.json();
+
+        const lista = document.getElementById('listaFerramentas');
+        lista.innerHTML = '';
+
+        data.forEach(file => {
+          if (file.name.endsWith('.html')) {
+            const li = document.createElement('li');
+            const btn = document.createElement('button');
+            btn.textContent = '📥 ' + file.name;
+            btn.className = 'w-full text-left hover:underline';
+            btn.onclick = () => importarFerramenta(file.download_url);
+            li.appendChild(btn);
+            lista.appendChild(li);
+          }
+        });
+      } catch (err) {
+        alert('Erro ao buscar ferramentas no repositório.');
+        console.error(err);
+      }
+    }
+
+    async function importarFerramenta(url) {
+      try {
+        const res = await fetch(url);
+        const html = await res.text();
+        const container = document.createElement('section');
+        container.className = 'bg-white dark:bg-gray-800 p-4 rounded-xl shadow mt-4 resize overflow-auto relative';
+        container.innerHTML = html;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '❌ Remover';
+        removeBtn.className = 'absolute top-2 right-2 text-sm bg-red-600 text-white px-2 py-1 rounded';
+        removeBtn.onclick = () => container.remove();
+        container.appendChild(removeBtn);
+
+        document.querySelector('main').appendChild(container);
+
+        // Salvar localmente (simulado - não persistente no navegador)
+        localStorage.setItem('ferramenta_' + url, html);
+      } catch (err) {
+        alert('Erro ao importar ferramenta.');
+        console.error(err);
+      }
+    }
+
+    // Recarregar ferramentas salvas localmente (emulado)
+    window.addEventListener('DOMContentLoaded', () => {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('ferramenta_')) {
+          const html = localStorage.getItem(key);
+          const container = document.createElement('section');
+          container.className = 'bg-white dark:bg-gray-800 p-4 rounded-xl shadow mt-4 resize overflow-auto relative';
+          container.innerHTML = html;
+
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = '❌ Remover';
+          removeBtn.className = 'absolute top-2 right-2 text-sm bg-red-600 text-white px-2 py-1 rounded';
+          removeBtn.onclick = () => container.remove();
+          container.appendChild(removeBtn);
+
+          document.querySelector('main').appendChild(container);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
